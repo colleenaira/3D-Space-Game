@@ -19,7 +19,7 @@ public class GameController : MonoBehaviour
     public Text endGamePrompt;      // Assign in the inspector
 
     
-    private bool isGameEnded = false;
+    public bool isGameEnded = false;
     private bool isTimerRunning = false;
 
 
@@ -63,6 +63,10 @@ public class GameController : MonoBehaviour
         {
             gateTriggerHandler.OnAllGatesPassed += EndGame;
         }
+    }
+    public void StopHealthDecrease()
+    {
+        isGameEnded = true; // Set the flag to stop health decrease in UpdateHealth method.
     }
 
     private void OnDisable()
@@ -125,17 +129,31 @@ public class GameController : MonoBehaviour
 
     public void UpdateHealth(float amount)
     {
-        health -= amount;
-        healthBar.fillAmount = Mathf.Clamp(health / maxHealth, 0, 1);
+
+        if (!isGameEnded && GateTriggerHandler.Instance.gatesPassed < GateTriggerHandler.Instance.totalGates)
+        {
+            health -= amount;
+            health = Mathf.Max(health, 5); // Ensure health doesn't drop below 5
+            healthBar.fillAmount = health / maxHealth;
+        }
+
+        // If health hits the minimum and all gates haven't been passed, you may want to handle that scenario.
+        if (health == 5 && GateTriggerHandler.Instance.gatesPassed < GateTriggerHandler.Instance.totalGates)
+        {
+            // Maybe trigger a warning or some effect to show that health is critical.
+        }
+
+        //health -= amount;
+        //healthBar.fillAmount = Mathf.Clamp(health / maxHealth, 0, 1);
 
         // Example condition for ending the game - you would check if the last gate is passed instead
-        if (health <= 0 && !isGameEnded)
-        {
-            EndGame();
-        }
+        //if (health <= 0 && !isGameEnded)
+        //{
+        //    EndGame();
+        //}
     }
 
-    private void EndGame()
+    public void EndGame()
     {
         Debug.Log("EndGame called - stopping timer.");
 

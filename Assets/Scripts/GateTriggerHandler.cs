@@ -11,7 +11,7 @@ public class GateTriggerHandler : MonoBehaviour
 {
     public static GateTriggerHandler Instance;
 
-    private int gatesPassed = 0;
+    public int gatesPassed = 0;
     public int totalGates = 4; // Set this in the inspector or calculate it at runtime
     public event Action OnAllGatesPassed;
 
@@ -41,7 +41,7 @@ public class GateTriggerHandler : MonoBehaviour
         GateTrigger.OnGatePassed -= GatePassed;
     }
 
-
+   
     public void GatePassed()
     {
         gatesPassed++;
@@ -54,6 +54,8 @@ public class GateTriggerHandler : MonoBehaviour
 
             // Call your method here that handles end of level
             OnAllGatesPassed?.Invoke();
+            GameController.Instance.StopHealthDecrease(); // Call a method to stop decreasing health.
+
         }
         else
         {

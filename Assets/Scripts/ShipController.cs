@@ -81,7 +81,12 @@ public class ShipController : MonoBehaviour
         float moveDistance = FlySpeed * Time.fixedDeltaTime;
 
 
-        // Use the input to change yaw, pitch, and roll
+
+        // Clamp the roll within the specified limits
+        //roll = Mathf.Clamp(roll + rollChange, -80, 80);
+
+
+        //// Use the input to change yaw, pitch, and roll
         yaw += horizontalInput * YawSpeed * Time.fixedDeltaTime;
         pitch += verticalInput * PitchSpeed * Time.fixedDeltaTime;
 
@@ -96,10 +101,10 @@ public class ShipController : MonoBehaviour
 
         roll = Mathf.Clamp(roll, -80, 80);
 
-        // Adjust rotation based on the yaw, pitch, and roll
+        //// Adjust rotation based on the yaw, pitch, and roll
         rb.rotation = Quaternion.Euler(new Vector3(pitch, yaw, roll));
 
-        // Move the ship forward based on the FlySpeed
+        //// Move the ship forward based on the FlySpeed
         rb.MovePosition(rb.position + rb.transform.forward * moveDistance);
 
 
