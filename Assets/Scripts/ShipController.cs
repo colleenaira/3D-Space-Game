@@ -5,9 +5,12 @@ using UnityEngine;
 
 public class ShipController : MonoBehaviour
 {
+    public float impactForce = 10f; // The force applied to the ship upon collision
+    public float controlRecoveryTime = 2f; // Time in seconds before control is fully regained
 
-   
-    public float FlySpeed = 5;
+    public float turnSpeed = 60f;
+    public float FlySpeed = 7f; 
+    public float moveSpeed = 7f;
     public float YawSpeed = 100;
     public float RollSpeed = 60;
     public float PitchSpeed = 60;
@@ -25,6 +28,7 @@ public class ShipController : MonoBehaviour
     private float verticalInput;
     private bool rollLeft;
     private bool rollRight;
+    public Transform thisShip;
 
 
     // Player Health 
@@ -40,6 +44,7 @@ public class ShipController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        rb.useGravity = false;
     }
 
     void Update()
@@ -52,9 +57,9 @@ public class ShipController : MonoBehaviour
 
         if (!isGameStarted) return;
 
-        // Collect input in Update
+        //// Collect input in Update
         horizontalInput = Input.GetAxis("Horizontal"); // Left and Right
-        verticalInput = -Input.GetAxis("Vertical"); // Up and Down
+        verticalInput = Input.GetAxis("Vertical"); // Up and Down
         rollLeft = Input.GetKey(KeyCode.Q);
         rollRight = Input.GetKey(KeyCode.E);
     }
@@ -73,12 +78,14 @@ public class ShipController : MonoBehaviour
     {
         // Don't proceed with the physics update
         if (!isGameStarted) return;
+        Turn();
+        Thrust();
 
-        rb.velocity = transform.forward * FlySpeed;
+        //rb.velocity = transform.forward * FlySpeed;
 
 
-        // Apply movement in FixedUpdate
-        float moveDistance = FlySpeed * Time.fixedDeltaTime;
+        //// Apply movement in FixedUpdate
+        //float moveDistance = FlySpeed * Time.fixedDeltaTime;
 
 
 
@@ -86,38 +93,66 @@ public class ShipController : MonoBehaviour
         //roll = Mathf.Clamp(roll + rollChange, -80, 80);
 
 
-        //// Use the input to change yaw, pitch, and roll
-        yaw += horizontalInput * YawSpeed * Time.fixedDeltaTime;
-        pitch += verticalInput * PitchSpeed * Time.fixedDeltaTime;
+        ////// Use the input to change yaw, pitch, and roll
+        //yaw += horizontalInput * YawSpeed * Time.fixedDeltaTime;
+        //pitch += verticalInput * PitchSpeed * Time.fixedDeltaTime;
 
-        if (rollLeft)
-        {
-            roll += RollSpeed * Time.fixedDeltaTime;
-        }
-        else if (rollRight)
-        {
-            roll -= RollSpeed * Time.fixedDeltaTime;
-        }
+        //if (rollLeft)
+        //{
+        //    roll += RollSpeed * Time.fixedDeltaTime;
+        //}
+        //else if (rollRight)
+        //{
+        //    roll -= RollSpeed * Time.fixedDeltaTime;
+        //}
 
-        roll = Mathf.Clamp(roll, -80, 80);
+        //roll = Mathf.Clamp(roll, -80, 80);
 
-        //// Adjust rotation based on the yaw, pitch, and roll
-        rb.rotation = Quaternion.Euler(new Vector3(pitch, yaw, roll));
+        ////// Adjust rotation based on the yaw, pitch, and roll
+        //rb.rotation = Quaternion.Euler(new Vector3(pitch, yaw, roll));
 
         //// Move the ship forward based on the FlySpeed
-        rb.MovePosition(rb.position + rb.transform.forward * moveDistance);
+        //rb.MovePosition(rb.position + rb.transform.forward * moveDistance);
 
 
+    }
+    void Turn()
+    {
+        // Gather input for yaw (turn), pitch (nose up/down), and roll (tilt)
+        float yaw = turnSpeed * Time.deltaTime * Input.GetAxis("Horizontal");
+        float pitch = turnSpeed * Time.deltaTime * Input.GetAxis("Vertical");
+        float roll = turnSpeed * Time.deltaTime * Input.GetAxis("Rotate");
+
+        // Rotate the ship based on input
+        thisShip.Rotate(pitch, yaw, roll);
+    }
+
+    void Thrust()
+    {
+        // Move the ship forward continuously in the direction it's facing
+        rb.velocity = transform.forward * moveSpeed;
     }
 
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Obstacle"))
         {
+            rb.AddForce(-collision.contacts[0].normal * impactForce, ForceMode.Impulse);
+            StartCoroutine(FreezeRotationTemporarily());
+
             GameController.Instance.UpdateHealth(damage);
             audioManager.PlaySFX(audioManager.wallTouch);
             //Debug.Log("Collision with: " + collision.gameObject.name);
         }
+
+        IEnumerator FreezeRotationTemporarily()
+        {
+            var originalAngularDrag = rb.angularDrag;
+            rb.angularDrag = 100; // Temporarily increase angular drag to "freeze" rotation
+            yield return new WaitForSeconds(controlRecoveryTime);
+            rb.angularDrag = originalAngularDrag; // Restore original angular drag
+        }
+
     }
 
 

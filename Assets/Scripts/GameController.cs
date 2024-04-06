@@ -3,6 +3,7 @@ using UnityEngine.UI; // Make sure to include the UI namespace
 using TMPro;
 using System.Collections.Generic;
 using System;
+using UnityEngine.SceneManagement;
 
 // Controls the timer and health UI
 // ShipController: Health changes upon collisions
@@ -69,15 +70,38 @@ public class GameController : MonoBehaviour
         isGameEnded = true; // Set the flag to stop health decrease in UpdateHealth method.
     }
 
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
     private void OnDisable()
     {
- 
+
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+
         // Unsubscribe to prevent memory leaks
         if (gateTriggerHandler != null)
         {
             gateTriggerHandler.OnAllGatesPassed -= EndGame;
         }
+
     }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Find the timerText again in the new scene
+        if (timerText != null)
+        {
+            timerText = GameObject.FindWithTag("TimerTextTag").GetComponent<TextMeshProUGUI>();
+
+        }
+        else
+        {
+            Debug.LogError("The TimerText object was not found in the new scene.");
+        }
+    }
+
     public void StartTimer()
     {
         // Set the timer to be active
@@ -164,9 +188,7 @@ public class GameController : MonoBehaviour
         audioManager.PlaySFX(audioManager.checkPoint);          // Play end game sound
 
         Debug.Log("You completed the course!");
-
-
-        // Show end game UI or perform other end game actions
+        SceneController.Instance.LoadNextScene();
 
     }
 }

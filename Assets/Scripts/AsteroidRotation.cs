@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Rotation : MonoBehaviour
 {
-    public Vector3 rotationSpeed = new Vector3(0f, 50f, 0f);
+    public Vector3 rotationSpeed = new Vector3(0f, 3f, 0f);
     public bool randomizeOnStart = true;
 
     void Start()
@@ -12,9 +12,9 @@ public class Rotation : MonoBehaviour
         if (randomizeOnStart)
         {
             rotationSpeed = new Vector3(
-                Random.Range(-50f, 50f),
-                Random.Range(-50f, 50f),
-                Random.Range(-50f, 50f)
+                Random.Range(-6f, 8f),
+                Random.Range(-6f, 8f),
+                Random.Range(-6f, 8f)
             );
         }
     }
