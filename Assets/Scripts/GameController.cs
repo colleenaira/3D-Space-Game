@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI; // Make sure to include the UI namespace
+using UnityEngine.UI; 
 using TMPro;
 using System.Collections.Generic;
 using System;
@@ -24,7 +24,7 @@ public class GameController : MonoBehaviour
     public TextMeshProUGUI startPrompt;
     public Text endGamePrompt;      // Assign in the inspector
 
-    
+    private bool isGameStarted;
     public bool isGameEnded = false;
     private bool isTimerRunning = false;
 
@@ -70,20 +70,62 @@ public class GameController : MonoBehaviour
         {
             gateTriggerHandler.OnAllGatesPassed += EndGame;
         }
+
+        InitializeUI();
+    }
+
+    private void InitializeUI()
+    {
+      
+        if (healthBar == null)
+        {
+            healthBar = GameObject.FindWithTag("HealthBarTag").GetComponent<Image>();
+            if (healthBar != null)
+            {
+                healthBar.fillAmount = health / maxHealth;
+            }
+        }
+
+        if (timerText == null)
+        {
+            timerText = GameObject.FindWithTag("TimerTextTag").GetComponent<TextMeshProUGUI>();
+            if (timerText == null)
+            {
+                timerText = GameObject.FindWithTag("TimerTextTag").GetComponent<TextMeshProUGUI>();
+                if (timerText != null)
+                {
+                    SetTimerText();
+                    Debug.Log("TimerText found and initialized.");
+                }
+                else
+                {
+                    Debug.LogError("TimerText not found.");
+                }
+            }
+         }
+
+        ShowGameUI(isGameStarted);         // Hide the game UI if the game hasn't started yet.
+    }
+
+
+    public void SetGameStarted(bool hasStarted)
+    {
+        isGameStarted = hasStarted;
+        ShowGameUI(hasStarted);
+        if (hasStarted)
+        {
+            StartTimer();
+        }
     }
 
     public void StartGame()
     {
+        isGameStarted = true;
         ShowGameUI(true);
         // Load first game scene...
     }
 
 
-
-    public void StopHealthDecrease()
-    {
-        isGameEnded = true; // Set the flag to stop health decrease in UpdateHealth method.
-    }
 
     void OnEnable()
     {
@@ -105,44 +147,53 @@ public class GameController : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Find the timerText again in the new scene
-        if (timerText != null)
-        {
-            timerText = GameObject.FindWithTag("TimerTextTag").GetComponent<TextMeshProUGUI>();
-
-        }
-        else
-        {
-            Debug.LogError("The TimerText object was not found in the new scene.");
-        }
+        InitializeUI();
+        ResetUI();
     }
 
     public void StartTimer()
     {
         // Set the timer to be active
+        Debug.Log("StartTimer called");
         isTimerRunning = true;
-        countDown = false; // Assuming you want to count down
     }
 
     void Update()
     {
-        if (isTimerRunning)
+        if (isGameStarted && isTimerRunning)
         {
-            currentTime += Time.deltaTime; // Only count up when the timer is running
-        }
-
-        if(hasLimit && (countDown && currentTime <= timerLimit || (!countDown && currentTime >= timerLimit))) 
-        {
-            currentTime = timerLimit;
+            currentTime += Time.deltaTime;
             SetTimerText();
-            timerText.color = Color.red;
-            enabled = false; 
         }
-
-        SetTimerText();
-
     }
 
+    public void ResetUI()
+    {
+        // Reset health
+        health = maxHealth;
+        if (healthBar != null)
+        {
+            healthBar.fillAmount = health / maxHealth;
+        }
+        else
+        {
+            Debug.LogError("HealthBar not found");
+        }
+
+        // Reset timer
+        currentTime = 0f;
+        if (timerText != null)
+        {
+            SetTimerText();
+        }
+        else
+        {
+            Debug.LogError("TimerText not found");
+        }
+
+        // Ensure the UI elements are in their default state
+        ShowGameUI(false);
+    }
     public void SetTimerText()
     {
         if (timerText != null)
@@ -159,7 +210,18 @@ public class GameController : MonoBehaviour
 
     public void StopTimer()
     {
+        timerText.color = Color.red;
         isTimerRunning = false;
+        if (hasLimit)
+        {
+            currentTime = timerLimit;
+            SetTimerText();
+        }
+    }
+
+    public void StopHealthDecrease()
+    {
+        isGameEnded = true; // Set the flag to stop health decrease in UpdateHealth method.
     }
 
 
@@ -171,6 +233,10 @@ public class GameController : MonoBehaviour
             health -= amount;
             health = Mathf.Max(health, 5); // Ensure health doesn't drop below 5
             healthBar.fillAmount = health / maxHealth;
+        }
+        else
+        {
+            Debug.Log("Not Updating health");
         }
 
         // If health hits the minimum and all gates haven't been passed, you may want to handle that scenario.
@@ -185,7 +251,6 @@ public class GameController : MonoBehaviour
     {
         healthBar.gameObject.SetActive(show);
         timerText.gameObject.SetActive(show);
-        startPrompt.gameObject.SetActive(!show);
     }
 
  
@@ -194,10 +259,10 @@ public class GameController : MonoBehaviour
         Debug.Log("EndGame called - stopping timer.");
 
         StopTimer();
-        isGameEnded = true;
 
         audioManager.StopMusic();                                // Stop BGM
         audioManager.PlaySFX(audioManager.checkPoint);          // Play end game sound
+        isGameEnded = true;
 
         Debug.Log("You completed the course!");
         SceneController.Instance.LoadNextScene();

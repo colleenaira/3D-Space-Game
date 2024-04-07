@@ -23,7 +23,6 @@ public class ShipController : MonoBehaviour
     public GameObject gameUI;
     public bool isGameStarted = false; // Added flag for game start
 
-    // Variables to store input
     private float horizontalInput;
     private float verticalInput;
     private bool rollLeft;
@@ -31,10 +30,8 @@ public class ShipController : MonoBehaviour
     public Transform thisShip;
 
 
-    // Player Health 
     public GameController gameController;
     public float damage;
-
     AudioManager audioManager;
 
     private void Awake()
@@ -49,31 +46,28 @@ public class ShipController : MonoBehaviour
 
     void Update()
     {
-        if (!isGameStarted && Input.GetKeyDown(KeyCode.Space))
+        if (!isGameStarted && Input.GetKeyDown(KeyCode.Space))         // Press spacebar to Start
         {
-            isGameStarted = true;
             StartGame();
         }
 
-        if (!isGameStarted) return;
+        if (!isGameStarted) return;         //Collect input in Update
 
-        //// Collect input in Update
-        horizontalInput = Input.GetAxis("Horizontal"); // Left and Right
-        verticalInput = Input.GetAxis("Vertical"); // Up and Down
+        horizontalInput = Input.GetAxis("Horizontal");  // Left and Right
+        verticalInput = Input.GetAxis("Vertical");      // Up and Down
         rollLeft = Input.GetKey(KeyCode.Q);
         rollRight = Input.GetKey(KeyCode.E);
     }
 
     public void StartGame()
-    {
-        GameController.Instance.ShowGameUI(true);
+    {        
+        isGameStarted = true;
+        gameUI.SetActive(false);         // Disable the main menu
+        GameController.Instance.SetGameStarted(true);
+        GameController.Instance.ResetUI();
+        gameUI.SetActive(false);
 
-        // Disable the main menu
-        if (gameUI != null)
-        {
-            gameUI.SetActive(false);
-        }
-        GameController.Instance.StartTimer();
+
     }
 
     void FixedUpdate()
@@ -89,13 +83,9 @@ public class ShipController : MonoBehaviour
         // Apply movement in FixedUpdate
         float moveDistance = FlySpeed * Time.fixedDeltaTime;
 
+        //roll = Mathf.Clamp(roll + rollChange, -80, 80);       //Clamp the roll within the specified limits
 
-
-       //Clamp the roll within the specified limits
-       //roll = Mathf.Clamp(roll + rollChange, -80, 80);
-
-
-        //// Use the input to change yaw, pitch, and roll
+        //Use the input to change yaw, pitch, and roll
         yaw += horizontalInput * YawSpeed * Time.fixedDeltaTime;
         pitch += verticalInput * PitchSpeed * Time.fixedDeltaTime;
 
@@ -110,12 +100,9 @@ public class ShipController : MonoBehaviour
 
         roll = Mathf.Clamp(roll, -80, 80);
 
-        //// Adjust rotation based on the yaw, pitch, and roll
-        rb.rotation = Quaternion.Euler(new Vector3(pitch, yaw, roll));
+        rb.rotation = Quaternion.Euler(new Vector3(pitch, yaw, roll));         // Adjust rotation based on the yaw, pitch, and roll
 
-        // Move the ship forward based on the FlySpeed
-        rb.MovePosition(rb.position + rb.transform.forward * moveDistance);
-
+        rb.MovePosition(rb.position + rb.transform.forward * moveDistance);    // Move the ship forward based on the FlySpeed
 
     }
     //void Turn()
@@ -143,17 +130,9 @@ public class ShipController : MonoBehaviour
             //StartCoroutine(FreezeRotationTemporarily());
 
             GameController.Instance.UpdateHealth(damage);
-            audioManager.PlaySFX(audioManager.wallTouch);
             //Debug.Log("Collision with: " + collision.gameObject.name);
+            audioManager.PlaySFX(audioManager.wallTouch);
         }
-
-        //IEnumerator FreezeRotationTemporarily()
-        //{
-        //    var originalAngularDrag = rb.angularDrag;
-        //    rb.angularDrag = 100; // Temporarily increase angular drag to "freeze" rotation
-        //    yield return new WaitForSeconds(controlRecoveryTime);
-        //    rb.angularDrag = originalAngularDrag; // Restore original angular drag
-        //}
 
     }
 

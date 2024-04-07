@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
+    public static AudioManager Instance { get; private set; }
+
     [Header("------ Audio Source ------")]
     [SerializeField] AudioSource musicSource;
     [SerializeField] AudioSource SFXSource;
@@ -17,6 +19,21 @@ public class AudioManager : MonoBehaviour
 
     // Start is called before the first frame update
     private AudioSource audioSource;
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            // Initialize your audio sources here
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
+
 
     void Start()
     {
