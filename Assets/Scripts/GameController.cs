@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using System;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 // Controls the timer and health UI
 // ShipController: Health changes upon collisions
@@ -14,9 +15,13 @@ public class GameController : MonoBehaviour
 {
     public static GameController Instance { get; private set; }
 
+    public GameObject gameUI;
+    
     public Image healthBar;
     public float health;            // Starting health
     public float maxHealth;
+
+    public TextMeshProUGUI startPrompt;
     public Text endGamePrompt;      // Assign in the inspector
 
     
@@ -43,6 +48,7 @@ public class GameController : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameUI);
         }
         else if (Instance != this)
         {
@@ -65,6 +71,15 @@ public class GameController : MonoBehaviour
             gateTriggerHandler.OnAllGatesPassed += EndGame;
         }
     }
+
+    public void StartGame()
+    {
+        ShowGameUI(true);
+        // Load first game scene...
+    }
+
+
+
     public void StopHealthDecrease()
     {
         isGameEnded = true; // Set the flag to stop health decrease in UpdateHealth method.
@@ -116,9 +131,6 @@ public class GameController : MonoBehaviour
             currentTime += Time.deltaTime; // Only count up when the timer is running
         }
 
-        // If first countdown is true then currentTime -, else currentTime + 
-        //currentTime = countDown ? currentTime -= Time.deltaTime : currentTime += Time.deltaTime;
-
         if(hasLimit && (countDown && currentTime <= timerLimit || (!countDown && currentTime >= timerLimit))) 
         {
             currentTime = timerLimit;
@@ -144,11 +156,11 @@ public class GameController : MonoBehaviour
             Debug.LogError("Timer Text is not assigned in GameController.");
         }
     }
+
     public void StopTimer()
     {
         isTimerRunning = false;
     }
-
 
 
     public void UpdateHealth(float amount)
@@ -167,16 +179,16 @@ public class GameController : MonoBehaviour
             // Maybe trigger a warning or some effect to show that health is critical.
         }
 
-        //health -= amount;
-        //healthBar.fillAmount = Mathf.Clamp(health / maxHealth, 0, 1);
-
-        // Example condition for ending the game - you would check if the last gate is passed instead
-        //if (health <= 0 && !isGameEnded)
-        //{
-        //    EndGame();
-        //}
     }
 
+    public void ShowGameUI(bool show)
+    {
+        healthBar.gameObject.SetActive(show);
+        timerText.gameObject.SetActive(show);
+        startPrompt.gameObject.SetActive(!show);
+    }
+
+ 
     public void EndGame()
     {
         Debug.Log("EndGame called - stopping timer.");

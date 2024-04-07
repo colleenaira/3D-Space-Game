@@ -9,6 +9,8 @@ public class MainMenu : MonoBehaviour
     public void PlayGame()
     {
         SceneController.Instance.LoadNextScene();
+        GameController.Instance.StartGame();
+
     }
 
     public void Quit() 
