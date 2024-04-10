@@ -29,7 +29,7 @@ public class SceneController : MonoBehaviour
     private void InitializeScenes()
     {
         // Assuming you have 8 scenes for the conditions
-        for (int i = 1; i <= 4; i++)
+        for (int i = 1; i <= 2; i++)
         {
             sceneOrder.Add(i);
             scenePlayCount[i] = 0;

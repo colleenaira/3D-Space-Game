@@ -54,7 +54,7 @@ public class GateTriggerHandler : MonoBehaviour
 
             // Call your method here that handles end of level
             OnAllGatesPassed?.Invoke();
-            GameController.Instance.StopHealthDecrease(); // Call a method to stop decreasing health.
+            //GameController.Instance.StopHealthDecrease(); // Call a method to stop decreasing health.
             GameController.Instance.EndGame(); 
         }
         else

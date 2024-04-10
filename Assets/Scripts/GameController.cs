@@ -13,17 +13,16 @@ using Unity.VisualScripting;
 
 public class GameController : MonoBehaviour
 {
+    AudioManager audioManager;
     public static GameController Instance { get; private set; }
-
+    private GateTriggerHandler gateTriggerHandler;
     public GameObject gameUI;
-    
     public Image healthBar;
-    public float health;            // Starting health
-    public float maxHealth;
-
     public TextMeshProUGUI startPrompt;
     public Text endGamePrompt;      // Assign in the inspector
 
+    public float health;
+    public float maxHealth;
     private bool isGameStarted;
     public bool isGameEnded = false;
     private bool isTimerRunning = false;
@@ -38,9 +37,6 @@ public class GameController : MonoBehaviour
     public bool hasLimit;
     public float timerLimit;
  
-    private GateTriggerHandler gateTriggerHandler;
-
-    AudioManager audioManager;
 
     void Awake()
     {
@@ -55,11 +51,13 @@ public class GameController : MonoBehaviour
             Destroy(gameObject);
         }
 
-        audioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
+        //audioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
+        audioManager = AudioManager.Instance;
 
     }
     void Start()
     {
+    
         maxHealth = health; 
         ShipController shipController = FindObjectOfType<ShipController>();
 
@@ -73,7 +71,11 @@ public class GameController : MonoBehaviour
 
         InitializeUI();
     }
-
+    public void InitializeUIComponents(TextMeshProUGUI timer)
+    {
+        this.timerText = timer;
+        // Any other initialization code...
+    }
     private void InitializeUI()
     {
       
@@ -104,7 +106,7 @@ public class GameController : MonoBehaviour
             }
          }
 
-        ShowGameUI(isGameStarted);         // Hide the game UI if the game hasn't started yet.
+        ShowGameUI(isGameStarted);  // Hide the game UI if the game hasn't started yet.
     }
 
 
@@ -124,8 +126,6 @@ public class GameController : MonoBehaviour
         ShowGameUI(true);
         // Load first game scene...
     }
-
-
 
     void OnEnable()
     {
@@ -153,7 +153,6 @@ public class GameController : MonoBehaviour
 
     public void StartTimer()
     {
-        // Set the timer to be active
         Debug.Log("StartTimer called");
         isTimerRunning = true;
     }
@@ -190,7 +189,6 @@ public class GameController : MonoBehaviour
         {
             Debug.LogError("TimerText not found");
         }
-
         // Ensure the UI elements are in their default state
         ShowGameUI(false);
     }
@@ -239,12 +237,6 @@ public class GameController : MonoBehaviour
             Debug.Log("Not Updating health");
         }
 
-        // If health hits the minimum and all gates haven't been passed, you may want to handle that scenario.
-        if (health == 5 && GateTriggerHandler.Instance.gatesPassed < GateTriggerHandler.Instance.totalGates)
-        {
-            // Maybe trigger a warning or some effect to show that health is critical.
-        }
-
     }
 
     public void ShowGameUI(bool show)
@@ -257,15 +249,24 @@ public class GameController : MonoBehaviour
     public void EndGame()
     {
         Debug.Log("EndGame called - stopping timer.");
-
         StopTimer();
 
-        audioManager.StopMusic();                                // Stop BGM
-        audioManager.PlaySFX(audioManager.checkPoint);          // Play end game sound
-        isGameEnded = true;
+        if (audioManager == null)
+        {
+            Debug.LogError("AudioManager instance is null.");
+        }
+        else if (audioManager.checkPoint == null)
+        {
+            Debug.LogError("checkPoint AudioClip is null.");
+        }
+        else
+        {
+            audioManager.PlaySFX(audioManager.checkPoint); // Play end game sound
+        }
 
+        isGameEnded = true;
         Debug.Log("You completed the course!");
-        SceneController.Instance.LoadNextScene();
+        //SceneController.Instance.LoadNextScene();
 
     }
 }

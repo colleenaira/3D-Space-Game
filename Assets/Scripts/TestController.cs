@@ -12,8 +12,6 @@ public class TestController : MonoBehaviour
     public float turnSpeed = 60f;
     public float moveSpeed = 45f;
 
-    public float impactForce = 10f; // The force applied to the ship upon collision
-    public float controlRecoveryTime = 2f; // Time in seconds before control is fully regained
 
 
     // Start is called before the first frame update
@@ -37,7 +35,6 @@ public class TestController : MonoBehaviour
         float roll = turnSpeed * Time.deltaTime * Input.GetAxis("Rotate");
         thisShip.Rotate(pitch, yaw, roll);
 
-
     }
 
     void Thrust()
@@ -45,28 +42,36 @@ public class TestController : MonoBehaviour
         r.velocity = transform.forward * moveSpeed;
     }
 
-
-    void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        Debug.Log($"Collision with {collision.gameObject.name}: point {collision.contacts[0].point}, normal {collision.contacts[0].normal}, velocity {r.velocity}");
-        // Check for collision with a "Rock" tag
-        if (collision.gameObject.CompareTag("Rock"))
+        if (other.CompareTag("Obstacle"))
         {
-            // Apply a force in the opposite direction of the collision
-            r.AddForce(-collision.contacts[0].normal * impactForce, ForceMode.Impulse);
-
-            // Optionally freeze rotation temporarily to help the player regain control
-            StartCoroutine(FreezeRotationTemporarily());
+            // Handle what happens when hitting an asteroid
+            Debug.Log("Passed through an asteroid!");
         }
     }
 
-    IEnumerator FreezeRotationTemporarily()
-    {
-        var originalAngularDrag = r.angularDrag;
-        r.angularDrag = 100; // Temporarily increase angular drag to "freeze" rotation
-        yield return new WaitForSeconds(controlRecoveryTime);
-        r.angularDrag = originalAngularDrag; // Restore original angular drag
-    }
+    //void OnCollisionEnter(Collision collision)
+    //{
+    //    Debug.Log($"Collision with {collision.gameObject.name}: point {collision.contacts[0].point}, normal {collision.contacts[0].normal}, velocity {r.velocity}");
+    //    // Check for collision with a "Rock" tag
+    //    if (collision.gameObject.CompareTag("Rock"))
+    //    {
+    //        // Apply a force in the opposite direction of the collision
+    //        r.AddForce(-collision.contacts[0].normal * impactForce, ForceMode.Impulse);
+
+    //        // Optionally freeze rotation temporarily to help the player regain control
+    //        StartCoroutine(FreezeRotationTemporarily());
+    //    }
+    //}
+
+    //IEnumerator FreezeRotationTemporarily()
+    //{
+    //    var originalAngularDrag = r.angularDrag;
+    //    r.angularDrag = 100; // Temporarily increase angular drag to "freeze" rotation
+    //    yield return new WaitForSeconds(controlRecoveryTime);
+    //    r.angularDrag = originalAngularDrag; // Restore original angular drag
+    //}
 
 }
 

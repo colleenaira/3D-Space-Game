@@ -8,7 +8,9 @@ public class MainMenu : MonoBehaviour
 
     public void PlayGame()
     {
-        SceneController.Instance.LoadNextScene();
+        SceneManager.LoadScene(1);
+        //SceneController.Instance.LoadNextScene();
+
         GameController.Instance.StartGame();
 
     }

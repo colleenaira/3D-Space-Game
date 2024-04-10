@@ -17,7 +17,7 @@ public class GateTrigger : MonoBehaviour
 
     private void Awake()
     {
-        audioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
+        audioManager = AudioManager.Instance;
     }
 
     private void OnTriggerEnter(Collider other)

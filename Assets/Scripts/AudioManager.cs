@@ -7,11 +7,11 @@ public class AudioManager : MonoBehaviour
     public static AudioManager Instance { get; private set; }
 
     [Header("------ Audio Source ------")]
-    [SerializeField] AudioSource musicSource;
+    //[SerializeField] AudioSource musicSource;
     [SerializeField] AudioSource SFXSource;
 
     [Header("------ Audio Clips ------")]
-    public AudioClip background;
+    //public AudioClip background;
     public AudioClip wallTouch;
     public AudioClip checkPoint;
     public AudioClip gateIn;
@@ -26,6 +26,8 @@ public class AudioManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            SFXSource = transform.Find("SFX").GetComponent<AudioSource>(); // Make sure this matches your child GameObject name
+
             // Initialize your audio sources here
         }
         else if (Instance != this)
@@ -34,20 +36,9 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-
-    void Start()
-    {
-        // Start BGM
-        musicSource.clip = background;
-        musicSource.Play();
-    }
-
     public void PlaySFX(AudioClip clip)
     {
         SFXSource.PlayOneShot(clip);
     }
-    public void StopMusic()
-    {
-        musicSource.Stop();
-    }
+  
 }
