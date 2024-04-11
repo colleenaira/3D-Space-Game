@@ -8,11 +8,14 @@ public class MainMenu : MonoBehaviour
 
     public void PlayGame()
     {
-        SceneManager.LoadScene(1);
-        //SceneController.Instance.LoadNextScene();
+        // Reset the scene index if you are starting a new game cycle.
+        SceneController.Instance.ResetSceneIndex();
 
-        GameController.Instance.StartGame();
+        // Load the first scene or let the SceneController decide which scene to load.
+        SceneController.Instance.LoadNextScene();
 
+        // Tell GameController to start the game.
+        GameController.Instance.SetGameStarted(true);
     }
 
     public void Quit() 
