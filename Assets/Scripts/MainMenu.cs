@@ -8,14 +8,20 @@ public class MainMenu : MonoBehaviour
 
     public void PlayGame()
     {
-        // Reset the scene index if you are starting a new game cycle.
-        SceneController.Instance.ResetSceneIndex();
+        Debug.Log("PlayGame method called");
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
 
         // Load the first scene or let the SceneController decide which scene to load.
-        SceneController.Instance.LoadNextScene();
 
-        // Tell GameController to start the game.
-        GameController.Instance.SetGameStarted(true);
+        if (GameController.Instance != null)
+        {
+            GameController.Instance.SetGameStarted(true);
+        }
+        else
+        {
+            Debug.LogError("GameController instance not found.");
+        }
     }
 
     public void Quit() 

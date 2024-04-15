@@ -54,7 +54,6 @@ public class ShipController : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Don't proceed with the physics update
         if (!isGameStarted) return;
         Turn();
         Thrust();
@@ -80,16 +79,36 @@ public class ShipController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Obstacle"))
+        // Check if collided with Wall
+        if (other.CompareTag("Wall"))
         {
-    
-            GameController.Instance.UpdateHealth(damage);
-
-            audioManager.PlaySFX(audioManager.wallTouch);
+            // Process as a wall collision but also count it as a gate pass
+            GameController.Instance.UpdateHealth(damage); // Apply damage or any other collision effect
+            audioManager.PlaySFX(audioManager.wallTouch); // Play collision sound effect
+            GateTriggerHandler.Instance.GatePassed(); // Count as gate passed
         }
-
+        else if (other.CompareTag("Gate"))
+        {
+            // Process as a gate pass without collision
+            GateTriggerHandler.Instance.GatePassed(); // Count as gate passed
+            audioManager.PlaySFX(audioManager.gateIn); // Play gate pass sound effect
+        }
+        else if (other.CompareTag("Obstacle"))
+        {
+            // Process as an obstacle collision, don't count as a gate pass
+            GameController.Instance.UpdateHealth(damage); // Apply damage or any other collision effect
+            audioManager.PlaySFX(audioManager.wallTouch); // Play collision sound effect
+                                                          // Don't call GatePassed because it's an obstacle, not a gate
+        }
     }
-
-
 }
+
+
+//if (other.CompareTag("Obstacle"))
+//{
+
+//    GameController.Instance.UpdateHealth(damage);
+//    audioManager.PlaySFX(audioManager.wallTouch);
+//}
+
 

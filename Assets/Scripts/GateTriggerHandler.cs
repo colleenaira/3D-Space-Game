@@ -44,17 +44,14 @@ public class GateTriggerHandler : MonoBehaviour
    
     public void GatePassed()
     {
+        Debug.Log("GatePassed called before increment: " + gatesPassed);
         gatesPassed++;
-        Debug.Log($"Gate passed. Current count: {gatesPassed}");
+        Debug.Log("GatePassed called after increment: " + gatesPassed);
 
         if (gatesPassed >= totalGates)
         {
-            // Trigger end of level sequence or show the UI for level completion
             Debug.Log("All gates passed!");
-
-            // Call your method here that handles end of level
             OnAllGatesPassed?.Invoke();
-            //GameController.Instance.StopHealthDecrease(); // Call a method to stop decreasing health.
             GameController.Instance.EndGame(); 
         }
         else
@@ -63,5 +60,8 @@ public class GateTriggerHandler : MonoBehaviour
         }
     }
 
-
+    public void ResetGates()
+    {
+        gatesPassed = 0;
+    }
 }

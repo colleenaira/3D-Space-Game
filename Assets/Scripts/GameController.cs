@@ -147,6 +147,13 @@ public class GameController : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+
+        if (gateTriggerHandler != null)
+        {
+            gateTriggerHandler.ResetGates(); // Reset gatesPassed count
+        }
+
+
         InitializeUI();
         ResetUI();
     }
@@ -266,7 +273,7 @@ public class GameController : MonoBehaviour
 
         isGameEnded = true;
         Debug.Log("You completed the course!");
-        //SceneController.Instance.LoadNextScene();
+        SceneController.Instance.LoadNextScene();
 
     }
 }

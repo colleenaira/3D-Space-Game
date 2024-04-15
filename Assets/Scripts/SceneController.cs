@@ -39,16 +39,14 @@ public class SceneController : MonoBehaviour
     {
         if (currentSceneIndex >= sceneOrder.Count)
         {
-            if (currentSceneIndex >= sceneOrder.Count)
-            {
-                Debug.Log("All scenes completed, going to the main menu.");
-                SceneManager.LoadScene("MainMenu"); // Replace with the actual name of your main menu scene.
-                return;
-            }
-
-            SceneManager.LoadScene(sceneOrder[currentSceneIndex]);
-            currentSceneIndex++;
+            Debug.Log("All scenes completed, going to the main menu.");
+            SceneManager.LoadScene("MainMenu"); // Replace with the actual name of your main menu scene.
+            return;
         }
+
+        // Load the next scene by build index or scene name
+        SceneManager.LoadScene(sceneOrder[currentSceneIndex]);
+        currentSceneIndex++;
     }
 
 
