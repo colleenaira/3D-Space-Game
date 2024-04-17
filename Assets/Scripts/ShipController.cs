@@ -22,19 +22,22 @@ public class ShipController : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log("ShipController: Awake");
         audioManager = AudioManager.Instance; // Instead of using GameObject.FindGameObjectWithTag
     }
     void Start()
     {
-  
+        Debug.Log("ShipController: Start");
         rb = GetComponent<Rigidbody>();
         rb.useGravity = false;
     }
 
     void Update()
     {
+        Debug.Log("ShipController: Update running");
         if (!isGameStarted && Input.GetKeyDown(KeyCode.Space)) // Press spacebar to Start
         {
+            Debug.Log("Spacebar pressed, calling StartGame.");
             StartGame();
         }
 
@@ -42,7 +45,8 @@ public class ShipController : MonoBehaviour
     }
 
     public void StartGame()
-    {        
+    {
+        Debug.Log("ShipController: StartGame");
         isGameStarted = true;
         gameUI.SetActive(false);         // Disable the main menu
         GameController.Instance.SetGameStarted(true);
@@ -79,36 +83,37 @@ public class ShipController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Check if collided with Wall
-        if (other.CompareTag("Wall"))
+        if (other.CompareTag("Obstacle"))
         {
-            // Process as a wall collision but also count it as a gate pass
-            GameController.Instance.UpdateHealth(damage); // Apply damage or any other collision effect
-            audioManager.PlaySFX(audioManager.wallTouch); // Play collision sound effect
-            GateTriggerHandler.Instance.GatePassed(); // Count as gate passed
+
+            //GameController.Instance.UpdateHealth(damage);
+            audioManager.PlaySFX(audioManager.wallTouch);
         }
-        else if (other.CompareTag("Gate"))
-        {
-            // Process as a gate pass without collision
-            GateTriggerHandler.Instance.GatePassed(); // Count as gate passed
-            audioManager.PlaySFX(audioManager.gateIn); // Play gate pass sound effect
-        }
-        else if (other.CompareTag("Obstacle"))
-        {
-            // Process as an obstacle collision, don't count as a gate pass
-            GameController.Instance.UpdateHealth(damage); // Apply damage or any other collision effect
-            audioManager.PlaySFX(audioManager.wallTouch); // Play collision sound effect
-                                                          // Don't call GatePassed because it's an obstacle, not a gate
-        }
+
+        //// Check if collided with Wall
+        //if (other.CompareTag("Wall"))
+        //{
+        //    // Process as a wall collision but also count it as a gate pass
+        //    GameController.Instance.UpdateHealth(damage); // Apply damage or any other collision effect
+        //    audioManager.PlaySFX(audioManager.wallTouch); // Play collision sound effect
+        //    GateTriggerHandler.Instance.GatePassed(); // Count as gate passed
+        //}
+        //else if (other.CompareTag("Gate"))
+        //{
+        //    // Process as a gate pass without collision
+        //    GateTriggerHandler.Instance.GatePassed(); // Count as gate passed
+        //    audioManager.PlaySFX(audioManager.gateIn); // Play gate pass sound effect
+        //}
+        //else if (other.CompareTag("Obstacle"))
+        //{
+        //    // Process as an obstacle collision, don't count as a gate pass
+        //    GameController.Instance.UpdateHealth(damage); // Apply damage or any other collision effect
+        //    audioManager.PlaySFX(audioManager.wallTouch); // Play collision sound effect
+        //                                                  // Don't call GatePassed because it's an obstacle, not a gate
+        //}
     }
 }
 
 
-//if (other.CompareTag("Obstacle"))
-//{
-
-//    GameController.Instance.UpdateHealth(damage);
-//    audioManager.PlaySFX(audioManager.wallTouch);
-//}
 
 

@@ -8,8 +8,8 @@ public class SceneController : MonoBehaviour
     public static SceneController Instance;
 
     private List<int> sceneOrder = new List<int>();
-    private int currentSceneIndex = 0;
     private Dictionary<int, int> scenePlayCount = new Dictionary<int, int>();
+
 
     void Awake()
     {
@@ -27,28 +27,75 @@ public class SceneController : MonoBehaviour
 
     private void InitializeScenes()
     {
-        // Assuming you have 8 scenes for the conditions
-        for (int i = 1; i <= 24; i++)
+        for (int i = 1; i <= 25; i++)
         {
             sceneOrder.Add(i);
             scenePlayCount[i] = 0;
         }
     }
 
-    public void LoadNextScene()
+    void Update()
     {
-        if (currentSceneIndex >= sceneOrder.Count)
+        // Press 'N' to load the next scene
+        if (Input.GetKeyDown(KeyCode.N))
         {
-            Debug.Log("All scenes completed, going to the main menu.");
-            SceneManager.LoadScene("MainMenu"); // Replace with the actual name of your main menu scene.
-            return;
+            LoadNextScene();
         }
 
-        // Load the next scene by build index or scene name
-        SceneManager.LoadScene(sceneOrder[currentSceneIndex]);
-        currentSceneIndex++;
+        // Press 'P' to load the previous scene (optional for testing)
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            LoadPreviousScene(); // You'll need to implement this method
+        }
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            RestartCurrentScene();
+        }
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            ReturnToMainMenu();
+        }
     }
 
+    public void LoadNextScene()
+    {
+
+        // Check if the current scene is the last in the build order
+        if (SceneManager.GetActiveScene().buildIndex == SceneManager.sceneCountInBuildSettings - 1)
+        {
+            // If it's the last scene, loop back to the main menu (assuming it's at build index 0)
+            SceneManager.LoadScene(0);
+        }
+        else
+        {
+            // If it's not the last scene, load the next scene
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        }
+    }
+
+    private void LoadPreviousScene()
+    {
+        int previousSceneIndex = SceneManager.GetActiveScene().buildIndex - 1;
+        if (previousSceneIndex < 0)
+        {
+            previousSceneIndex = SceneManager.sceneCountInBuildSettings - 1;
+        }
+        SceneManager.LoadScene(previousSceneIndex);
+    }
+
+    void RestartCurrentScene()
+    {
+        // Reload the current scene
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        Debug.Log("Scene restarted.");
+    }
+
+    void ReturnToMainMenu()
+    {
+        // Load the main menu scene (assuming it's at build index 0)
+        SceneManager.LoadScene(0);
+        Debug.Log("Returned to main menu.");
+    }
 
     // Call this method from the end of each trial/scene
     public void OnSceneEnd()
@@ -56,9 +103,9 @@ public class SceneController : MonoBehaviour
         LoadNextScene();
     }
 
-    public void ResetSceneIndex()
-    {
-        currentSceneIndex = 0; // Reset index to start from the first scene.
-    }
+    //public void ResetSceneIndex()
+    //{
+    //    currentSceneIndex = 0; // Reset index to start from the first scene.
+    //}
 
 }

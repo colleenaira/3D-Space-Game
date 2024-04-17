@@ -44,9 +44,9 @@ public class GateTriggerHandler : MonoBehaviour
    
     public void GatePassed()
     {
-        Debug.Log("GatePassed called before increment: " + gatesPassed);
+        //Debug.Log("GatePassed called before increment: " + gatesPassed);
         gatesPassed++;
-        Debug.Log("GatePassed called after increment: " + gatesPassed);
+        //Debug.Log("GatePassed called after increment: " + gatesPassed);
 
         if (gatesPassed >= totalGates)
         {
@@ -56,7 +56,7 @@ public class GateTriggerHandler : MonoBehaviour
         }
         else
         {
-            Debug.Log($"Remaining gates to pass: {totalGates - gatesPassed}");
+            //Debug.Log($"Remaining gates to pass: {totalGates - gatesPassed}");
         }
     }
 

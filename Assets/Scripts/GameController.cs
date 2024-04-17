@@ -38,6 +38,7 @@ public class GameController : MonoBehaviour
     public float timerLimit;
  
 
+
     void Awake()
     {
         if (Instance == null)
@@ -57,7 +58,8 @@ public class GameController : MonoBehaviour
     }
     void Start()
     {
-    
+        Debug.Log("GameController: Start");
+
         maxHealth = health; 
         ShipController shipController = FindObjectOfType<ShipController>();
 
@@ -130,6 +132,7 @@ public class GameController : MonoBehaviour
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+        Debug.Log("GameController: OnEnable");
     }
 
     private void OnDisable()
@@ -137,14 +140,13 @@ public class GameController : MonoBehaviour
 
         SceneManager.sceneLoaded -= OnSceneLoaded;
 
-        // Unsubscribe to prevent memory leaks
         if (gateTriggerHandler != null)
         {
             gateTriggerHandler.OnAllGatesPassed -= EndGame;
         }
 
     }
-
+    
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
 
@@ -160,14 +162,16 @@ public class GameController : MonoBehaviour
 
     public void StartTimer()
     {
-        Debug.Log("StartTimer called");
+        //Debug.Log("StartTimer called");
         isTimerRunning = true;
     }
 
     void Update()
     {
+        Debug.Log("GameController: Update");
         if (isGameStarted && isTimerRunning)
         {
+            //Debug.Log("GameController Update running");
             currentTime += Time.deltaTime;
             SetTimerText();
         }
@@ -183,7 +187,7 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            Debug.LogError("HealthBar not found");
+            //Debug.LogError("HealthBar not found");
         }
 
         // Reset timer
@@ -194,7 +198,7 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            Debug.LogError("TimerText not found");
+            //Debug.LogError("TimerText not found");
         }
         // Ensure the UI elements are in their default state
         ShowGameUI(false);
@@ -209,7 +213,7 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Timer Text is not assigned in GameController.");
+            //Debug.LogError("Timer Text is not assigned in GameController.");
         }
     }
 
@@ -224,27 +228,27 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void StopHealthDecrease()
-    {
-        isGameEnded = true; // Set the flag to stop health decrease in UpdateHealth method.
-    }
+    //public void StopHealthDecrease()
+    //{
+    //    isGameEnded = true; // Set the flag to stop health decrease in UpdateHealth method.
+    //}
 
 
-    public void UpdateHealth(float amount)
-    {
+    //public void UpdateHealth(float amount)
+    //{
 
-        if (!isGameEnded && GateTriggerHandler.Instance.gatesPassed < GateTriggerHandler.Instance.totalGates)
-        {
-            health -= amount;
-            health = Mathf.Max(health, 5); // Ensure health doesn't drop below 5
-            healthBar.fillAmount = health / maxHealth;
-        }
-        else
-        {
-            Debug.Log("Not Updating health");
-        }
+    //    if (!isGameEnded && GateTriggerHandler.Instance.gatesPassed < GateTriggerHandler.Instance.totalGates)
+    //    {
+    //        health -= amount;
+    //        health = Mathf.Max(health, 5); // Ensure health doesn't drop below 5
+    //        healthBar.fillAmount = health / maxHealth;
+    //    }
+    //    else
+    //    {
+    //        //Debug.Log("Not Updating health");
+    //    }
 
-    }
+    //}
 
     public void ShowGameUI(bool show)
     {
@@ -252,7 +256,6 @@ public class GameController : MonoBehaviour
         timerText.gameObject.SetActive(show);
     }
 
- 
     public void EndGame()
     {
         Debug.Log("EndGame called - stopping timer.");
@@ -276,4 +279,5 @@ public class GameController : MonoBehaviour
         SceneController.Instance.LoadNextScene();
 
     }
+
 }

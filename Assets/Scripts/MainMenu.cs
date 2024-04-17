@@ -9,8 +9,7 @@ public class MainMenu : MonoBehaviour
     public void PlayGame()
     {
         Debug.Log("PlayGame method called");
-
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        SceneController.Instance.LoadNextScene();
 
         // Load the first scene or let the SceneController decide which scene to load.
 

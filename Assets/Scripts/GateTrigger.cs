@@ -22,16 +22,18 @@ public class GateTrigger : MonoBehaviour
     {
         if (!hasBeenTriggered && other.CompareTag("Ship"))
         {
-            Debug.Log($"Gate triggered by {other.gameObject.name}");
-            
+            audioManager.PlaySFX(audioManager.gateIn);
+            OnGatePassed?.Invoke();
+            hasBeenTriggered = true; // Set the flag to true to prevent re-triggering
 
-            // If the GameObject this script is attached to is tagged as "Gate"
-            if (gameObject.CompareTag("Gate"))
-            {
-                OnGatePassed?.Invoke(); // This line raises the event
-                hasBeenTriggered = true;
-                audioManager.PlaySFX(audioManager.gateIn);
-            }
+            //Debug.Log($"Gate triggered by {other.gameObject.name}");
+            //// If the GameObject this script is attached to is tagged as "Gate"
+            //if (gameObject.CompareTag("Gate"))
+            //{
+            //    OnGatePassed?.Invoke(); // This line raises the event
+            //    hasBeenTriggered = true;
+            //    audioManager.PlaySFX(audioManager.gateIn);
+            //}
            
         }
     }
