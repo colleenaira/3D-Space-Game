@@ -47,10 +47,14 @@ public class SceneController : MonoBehaviour
         {
             LoadPreviousScene(); // You'll need to implement this method
         }
+
+        // Press 'U' to restart current scene (optional for testing)
         if (Input.GetKeyDown(KeyCode.U))
         {
             RestartCurrentScene();
         }
+
+        // Press 'M' to return to main menu (optional for testing)
         if (Input.GetKeyDown(KeyCode.M))
         {
             ReturnToMainMenu();
