@@ -60,6 +60,8 @@ Shader "VolumetricLine/SingleLine-LightSaber" {
 				#define LIGHT_SABER_MODE_ON
 
 				#include "_SingleLineShader.cginc"
+
+				//#include "VolumetricLines\BuiltInRenderPipeline\Shaders\_SingleLineShader.cginc"
 			ENDCG
 		}
 	}
