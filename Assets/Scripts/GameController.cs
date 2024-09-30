@@ -3,150 +3,134 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 using System;
+using System.Reflection;
+using UnityEditor;
 using UnityEngine.SceneManagement;
 using Unity.VisualScripting;
 
-// Controls the timer and health UI
-// ShipController: Health changes upon collisions
-// GateTriggerHandler: for level completion 
 
+/*
+ * Class: GameController
+ * Description: Manages game state like timers and level transitions. Previously handles UI updates and interacts with the ShipController for game events.
+ * Handles end-game logic and logs game completion time and other statistics.
+ * Usage: Attach this script to the GameManager GameObject in the MainMenu scene that controls game state across scenes.
+ * Use Debug.Log statements for reviewing, identifying, and cleaning up any issues.
+ */
 
 public class GameController : MonoBehaviour
 {
-    AudioManager audioManager;
-    public static GameController Instance { get; private set; }
-    private GateTriggerHandler gateTriggerHandler;
-    public GameObject gameUI;
-    public Image healthBar;
-    public TextMeshProUGUI startPrompt;
-    public Text endGamePrompt;      // Assign in the inspector
 
-    public float health;
-    public float maxHealth;
+    // Singleton pattern to ensure only one instance of GameController exists.
+    public static GameController Instance { get; private set; }
+
+    [Header("UI Components")]
+    public GameObject gameUI;
+    public TextMeshProUGUI startPrompt;
+    public Text endGamePrompt;      // Assign these in the Unity inspector.
+
+    [Header("Game Stats")]
     private bool isGameStarted;
     public bool isGameEnded = false;
+    private float gameStartTime;
+    private float gameEndTime;
+
+    public float currentTime;
     private bool isTimerRunning = false;
 
 
-    [Header("Component")]
-    public TextMeshProUGUI timerText;
-    [Header("Timer Settings")]
-    public float currentTime;
-    public bool countDown = false;
-    [Header("Timer Limit")]
-    public bool hasLimit;
-    public float timerLimit;
- 
+    AudioManager audioManager;
+    private GateTriggerHandler gateTriggerHandler;
 
 
+    /// This method is to clear the console every new scene as it can be overwhelming when checking for logs
+    public class ClearUnityConsole
+    {
+        public static void ClearConsole()
+        {
+            // This simply does "LogEntries.Clear()" the long way:
+            var assembly = Assembly.GetAssembly(typeof(SceneView));
+            var type = assembly.GetType("UnityEditor.LogEntries");
+            var method = type.GetMethod("Clear");
+            method.Invoke(new object(), null);
+        }
+    }
+
+
+    // This method initializes the game environment.
     void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameObject); // Keep the game controller persisting across scenes.
             DontDestroyOnLoad(gameUI);
         }
         else if (Instance != this)
         {
-            Destroy(gameObject);
+            Destroy(gameObject);  // Ensures only one instance is active.
         }
-
-        //audioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
-        audioManager = AudioManager.Instance;
-
+        audioManager = AudioManager.Instance;  // Setup reference to the audio manager.
     }
+
     void Start()
     {
-        Debug.Log("GameController: Start");
+        if (audioManager == null)
+        {
+            audioManager = AudioManager.Instance;
+            if (audioManager == null)
+            {
+                Debug.LogError("AudioManager is still not initialized.");
+            }
+        }
 
-        maxHealth = health; 
+        //Debug.Log("GameController: Start");
         ShipController shipController = FindObjectOfType<ShipController>();
-
         gateTriggerHandler = FindObjectOfType<GateTriggerHandler>();
      
 
         if (gateTriggerHandler != null)
         {
-            gateTriggerHandler.OnAllGatesPassed += EndGame;
+            gateTriggerHandler.OnAllGatesPassed += EndGame;  // Subscribe to the event when all gates are passed.
         }
-
-        InitializeUI();
-    }
-    public void InitializeUIComponents(TextMeshProUGUI timer)
-    {
-        this.timerText = timer;
-        // Any other initialization code...
-    }
-    private void InitializeUI()
-    {
-      
-        if (healthBar == null)
-        {
-            healthBar = GameObject.FindWithTag("HealthBarTag").GetComponent<Image>();
-            if (healthBar != null)
-            {
-                healthBar.fillAmount = health / maxHealth;
-            }
-        }
-
-        if (timerText == null)
-        {
-            timerText = GameObject.FindWithTag("TimerTextTag").GetComponent<TextMeshProUGUI>();
-            if (timerText == null)
-            {
-                timerText = GameObject.FindWithTag("TimerTextTag").GetComponent<TextMeshProUGUI>();
-                if (timerText != null)
-                {
-                    SetTimerText();
-                    Debug.Log("TimerText found and initialized.");
-                }
-                else
-                {
-                    Debug.LogError("TimerText not found.");
-                }
-            }
-         }
-
-        ShowGameUI(isGameStarted);  // Hide the game UI if the game hasn't started yet.
     }
 
 
+    // This method marks the game as started and updates the UI.
     public void SetGameStarted(bool hasStarted)
     {
         isGameStarted = hasStarted;
-        ShowGameUI(hasStarted);
         if (hasStarted)
         {
             StartTimer();
         }
     }
 
+    // This method initializes game start conditions.
     public void StartGame()
     {
         isGameStarted = true;
-        ShowGameUI(true);
-        // Load first game scene...
+        // Loads first game scene...
     }
 
+
+    // OnEnable and OnDisable manage scene loading/unloading behaviors.
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
-        Debug.Log("GameController: OnEnable");
+        //Debug.Log("GameController: OnEnable");
     }
 
     private void OnDisable()
     {
-
         SceneManager.sceneLoaded -= OnSceneLoaded;
 
         if (gateTriggerHandler != null)
         {
             gateTriggerHandler.OnAllGatesPassed -= EndGame;
         }
-
     }
-    
+
+    // This method resets UI and game state when a new scene loads.
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
 
@@ -154,11 +138,9 @@ public class GameController : MonoBehaviour
         {
             gateTriggerHandler.ResetGates(); // Reset gatesPassed count
         }
-
-
-        InitializeUI();
-        ResetUI();
+        //ClearUnityConsole.ClearConsole(); 
     }
+
 
     public void StartTimer()
     {
@@ -166,99 +148,47 @@ public class GameController : MonoBehaviour
         isTimerRunning = true;
     }
 
+
+    // This method is called once per frame to update time-sensitive components.
     void Update()
     {
-        Debug.Log("GameController: Update");
+        //Debug.Log("GameController: Update");
         if (isGameStarted && isTimerRunning)
         {
             //Debug.Log("GameController Update running");
             currentTime += Time.deltaTime;
-            SetTimerText();
         }
     }
 
-    public void ResetUI()
-    {
-        // Reset health
-        health = maxHealth;
-        if (healthBar != null)
-        {
-            healthBar.fillAmount = health / maxHealth;
-        }
-        else
-        {
-            //Debug.LogError("HealthBar not found");
-        }
-
-        // Reset timer
-        currentTime = 0f;
-        if (timerText != null)
-        {
-            SetTimerText();
-        }
-        else
-        {
-            //Debug.LogError("TimerText not found");
-        }
-        // Ensure the UI elements are in their default state
-        ShowGameUI(false);
-    }
-    public void SetTimerText()
-    {
-        if (timerText != null)
-        {
-            TimeSpan timeSpan = TimeSpan.FromSeconds(currentTime);
-            timerText.text = string.Format("{0:D2}:{1:D2}.{2:D2}",
-                       timeSpan.Minutes, timeSpan.Seconds, timeSpan.Milliseconds);
-        }
-        else
-        {
-            //Debug.LogError("Timer Text is not assigned in GameController.");
-        }
-    }
 
     public void StopTimer()
     {
-        timerText.color = Color.red;
         isTimerRunning = false;
-        if (hasLimit)
+       /* if (hasLimit)
         {
             currentTime = timerLimit;
-            SetTimerText();
+        }*/
+    }
+
+    public void DisplayCollisionCount()
+    {
+        ShipController shipController = FindObjectOfType<ShipController>();
+        if (shipController != null)
+        {
+            int collisions = shipController.GetCollisionCount();
+            Debug.Log("Total collisions in this scene: " + collisions);
+        }
+        else
+        {
+            Debug.Log("ShipController not found.");
         }
     }
 
-    //public void StopHealthDecrease()
-    //{
-    //    isGameEnded = true; // Set the flag to stop health decrease in UpdateHealth method.
-    //}
-
-
-    //public void UpdateHealth(float amount)
-    //{
-
-    //    if (!isGameEnded && GateTriggerHandler.Instance.gatesPassed < GateTriggerHandler.Instance.totalGates)
-    //    {
-    //        health -= amount;
-    //        health = Mathf.Max(health, 5); // Ensure health doesn't drop below 5
-    //        healthBar.fillAmount = health / maxHealth;
-    //    }
-    //    else
-    //    {
-    //        //Debug.Log("Not Updating health");
-    //    }
-
-    //}
-
-    public void ShowGameUI(bool show)
-    {
-        healthBar.gameObject.SetActive(show);
-        timerText.gameObject.SetActive(show);
-    }
-
+   
     public void EndGame()
     {
-        Debug.Log("EndGame called - stopping timer.");
+
+        //Debug.Log("EndGame called - stopping timer.");
         StopTimer();
 
         if (audioManager == null)
@@ -275,9 +205,21 @@ public class GameController : MonoBehaviour
         }
 
         isGameEnded = true;
+        LogGameStats();
         Debug.Log("You completed the course!");
         SceneController.Instance.LoadNextScene();
 
+    }
+
+
+    // This method output game statistics at the end of each scene in the console.
+    private void LogGameStats()
+    {
+        float totalCollisionTime = FindObjectOfType<ShipController>().collisionTime;
+        Debug.Log($"End Game - Total collision time: {totalCollisionTime} seconds");
+
+        int totalCollisions = FindObjectOfType<ShipController>().GetCollisionCount();
+        Debug.Log($"End Game - Total collisions in this scene: {totalCollisions}");
     }
 
 }

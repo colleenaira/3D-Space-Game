@@ -1,5 +1,13 @@
 using UnityEngine;
 
+
+/*
+ * Class: DevelopmentAudio
+ * Description: Ensures essential components, AudioManager and GameController, are present in the scene.
+ * Functionality: Checks if AudioManager and GameController instances exist at scene load. If not, instantiates them from prefabs. 
+ * Use Case: Useful in development for modular testing and ensures essential managers are always active, regardless of the entry scene.
+ */
+
 public class DevelopmentAudio : MonoBehaviour
 {
     public GameObject audioManagerPrefab;
