@@ -127,7 +127,7 @@ public class ShipController : MonoBehaviour
             audioManager.PlaySFX(audioManager.wallTouch);
             
             //Debug.Log("Collision with obstacle: " + other.name + " at " + Time.time);
-            Debug.Log("New Collision Counted: " + collisionCount);
+            //Debug.Log("New Collision Counted: " + collisionCount);
         }
     }
 

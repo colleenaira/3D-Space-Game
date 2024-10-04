@@ -55,17 +55,17 @@ public class GateTriggerHandler : MonoBehaviour
     {
         //Debug.Log("GatePassed called before increment: " + gatesPassed);
         gatesPassed++;
-        Debug.Log("GatePassed called after increment: " + gatesPassed);
+        //Debug.Log("GatePassed called after increment: " + gatesPassed);
 
         if (gatesPassed >= totalGates)
         {
             Debug.Log("All gates passed!");
-            OnAllGatesPassed?.Invoke();
+            //OnAllGatesPassed?.Invoke();
             GameController.Instance.EndGame(); 
         }
         else
         {
-            Debug.Log($"Remaining gates to pass: {totalGates - gatesPassed}");
+            //Debug.Log($"Remaining gates to pass: {totalGates - gatesPassed}");
         }
     }
 

@@ -7,6 +7,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine.SceneManagement;
 using Unity.VisualScripting;
+using System.IO;
 
 
 /*
@@ -23,6 +24,7 @@ public class GameController : MonoBehaviour
     // Singleton pattern to ensure only one instance of GameController exists.
     public static GameController Instance { get; private set; }
 
+
     [Header("UI Components")]
     public GameObject gameUI;
     public TextMeshProUGUI startPrompt;
@@ -37,6 +39,8 @@ public class GameController : MonoBehaviour
     public float currentTime;
     private bool isTimerRunning = false;
 
+    private List<SceneData> allSceneData = new List<SceneData>();
+    public static int participantID = 0;
 
     AudioManager audioManager;
     private GateTriggerHandler gateTriggerHandler;
@@ -101,16 +105,13 @@ public class GameController : MonoBehaviour
         isGameStarted = hasStarted;
         if (hasStarted)
         {
+            //ClearUnityConsole.ClearConsole();
+            gameStartTime = Time.time;
+            //Debug.Log("Game Started at: " + gameStartTime);
             StartTimer();
         }
     }
 
-    // This method initializes game start conditions.
-    public void StartGame()
-    {
-        isGameStarted = true;
-        // Loads first game scene...
-    }
 
 
     // OnEnable and OnDisable manage scene loading/unloading behaviors.
@@ -133,12 +134,13 @@ public class GameController : MonoBehaviour
     // This method resets UI and game state when a new scene loads.
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        isGameEnded = false;
+        currentTime = 0f;           // Reset current time counter
 
         if (gateTriggerHandler != null)
         {
             gateTriggerHandler.ResetGates(); // Reset gatesPassed count
         }
-        //ClearUnityConsole.ClearConsole(); 
     }
 
 
@@ -164,10 +166,6 @@ public class GameController : MonoBehaviour
     public void StopTimer()
     {
         isTimerRunning = false;
-       /* if (hasLimit)
-        {
-            currentTime = timerLimit;
-        }*/
     }
 
     public void DisplayCollisionCount()
@@ -184,42 +182,76 @@ public class GameController : MonoBehaviour
         }
     }
 
-   
+
     public void EndGame()
     {
 
-        //Debug.Log("EndGame called - stopping timer.");
-        StopTimer();
+        Debug.Log("EndGame method called.");
+        //Debug.Log($"Attempting to end game: Game Started = {isGameStarted}, Game Ended = {isGameEnded}");
+        if (isGameStarted && !isGameEnded)
+        {
+            //Debug.Log("EndGame conditions met.");
+            gameEndTime = Time.time;
+            float totalTime = gameEndTime - gameStartTime;
+            isGameEnded = true;
+            StopTimer();
 
-        if (audioManager == null)
-        {
-            Debug.LogError("AudioManager instance is null.");
-        }
-        else if (audioManager.checkPoint == null)
-        {
-            Debug.LogError("checkPoint AudioClip is null.");
+            SceneData currentSceneData = new SceneData
+            {
+                sceneIndex = SceneManager.GetActiveScene().buildIndex,
+                completionTime = totalTime,
+                collisionCount = FindObjectOfType<ShipController>().GetCollisionCount(),
+                totalCollisionTime = FindObjectOfType<ShipController>().collisionTime,
+            };
+            //allSceneData.Add(currentSceneData);
+
+/*            if (SceneManager.GetActiveScene().buildIndex == 24) // Assuming 24 is the index of the last scene
+            {
+                DataHandler.ExportParticipantDataToCSV(participantID, currentSceneData);
+                DataHandler.UpdateMasterDataToCSV(participantID, currentSceneData);
+                participantID++; // Increment the participant ID after saving the data
+            }*/
+
+ /*         DataHandler.Instance.AddSceneData(currentSceneData);
+            DataHandler.Instance.ExportDataToCSV(); */
+
+
+            LogGameStats(totalTime);
+
+            if (audioManager == null)
+            {
+                Debug.LogError("AudioManager instance is null.");
+            }
+            else if (audioManager.checkPoint == null)
+            {
+                Debug.LogError("checkPoint AudioClip is null.");
+            }
+            else
+            {
+                audioManager.PlaySFX(audioManager.checkPoint);
+            }
+            SceneController.Instance.LoadNextScene();
         }
         else
         {
-            audioManager.PlaySFX(audioManager.checkPoint); // Play end game sound
+            Debug.Log("EndGame conditions not met.");
         }
-
-        isGameEnded = true;
-        LogGameStats();
-        Debug.Log("You completed the course!");
-        SceneController.Instance.LoadNextScene();
 
     }
 
 
     // This method output game statistics at the end of each scene in the console.
-    private void LogGameStats()
+    private void LogGameStats(float totalTime)
     {
         float totalCollisionTime = FindObjectOfType<ShipController>().collisionTime;
         Debug.Log($"End Game - Total collision time: {totalCollisionTime} seconds");
 
         int totalCollisions = FindObjectOfType<ShipController>().GetCollisionCount();
         Debug.Log($"End Game - Total collisions in this scene: {totalCollisions}");
+
+        Debug.Log($"Scene completed in - {totalTime} seconds");
+        Debug.Log("==============================================================");
+
     }
 
 }

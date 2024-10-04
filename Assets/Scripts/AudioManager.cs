@@ -30,20 +30,20 @@ public class AudioManager : MonoBehaviour
     void Awake()
     {
         // Singleton pattern to ensure only one instance exists
-        Debug.Log("AudioManager Awake is called.");
+        //Debug.Log("AudioManager Awake is called.");
 
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
             SFXSource = transform.Find("SFX").GetComponent<AudioSource>(); // Make sure this matches child GameObject name
-            Debug.Log("AudioManager Instance set.");
+            //Debug.Log("AudioManager Instance set.");
 
 
         }
         else if (Instance != this)
         {
-            Debug.Log("Another instance of AudioManager was found and destroyed.");
+            //Debug.Log("Another instance of AudioManager was found and destroyed.");
             Destroy(gameObject);
         }
     }
